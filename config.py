@@ -10,7 +10,7 @@ class Config(object):
 
 
     #未数据库添加配置
-    SQLALCHEMY_DATABASE_URI="mysql://wangdengkai:wangdengkai@127.0.0.1:3306/infomation"
+    SQLALCHEMY_DATABASE_URI="mysql+pymysql://wangdengkai:wangdengkai@127.0.0.1:3306/infomation"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
     #Redis的配置

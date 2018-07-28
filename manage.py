@@ -5,6 +5,7 @@ from info import create_app
 from info import db ,models
 
 
+
 '''
     这个模块专门提供启动程序的逻辑.
 '''
