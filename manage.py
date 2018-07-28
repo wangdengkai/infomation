@@ -19,7 +19,7 @@ manager.add_command('db',MigrateCommand)
 
 @app.route("/")
 def index():
-    # logging.info("hah")
+
     return "indexi"
 
 if __name__ == '__main__':
