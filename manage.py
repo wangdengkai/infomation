@@ -2,6 +2,9 @@ from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 
 from info import app,db
+'''
+    这个模块专门提供启动程序的逻辑.
+'''
 
 #关联app
 manager = Manager(app)

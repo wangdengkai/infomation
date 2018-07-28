@@ -3,7 +3,7 @@ from redis import StrictRedis
 
 class Config(object):
     '''项目的配置'''
-    DEBUG = True
+
     SECRET_KEY ='ZqSFNHmDmg097SioiysE63xOgISjp0RcnTYM28DCx2kb4yGgX5Us6RPG1/jSZGCi'
 
 
@@ -25,3 +25,27 @@ class Config(object):
     SESSION_PERMANENT=False
     #设置session,保存时间
     PERMANENT_SESSION_LIFETIME = 86400 * 2
+
+class DevelopmentConfig(Config):
+    '''开发环境下的配置'''
+    DEBUG = True
+class ProductionConfig(Config):
+    '''生产环境下的配置'''
+    DEBUG = False
+    #生产环境下数据库的配置
+
+class TestingConfig(Config):
+    '''单元测试环境下的配置'''
+    DEBUG = True
+    TESTING = True
+
+    #未数据库添加配置
+    SQLALCHEMY_DATABASE_URI="mysql://wangdengkai:wangdengkai@127.0.0.1:3306/test_infomation"
+    SQLALCHEMY_TRACK_MODIFICATIONS = True
+
+
+config={
+    'development':DevelopmentConfig,
+    'production':ProductionConfig,
+    'testing':TestingConfig
+}
