@@ -1,10 +1,10 @@
-import logging
 
-from flask import current_app
 from flask_migrate import Migrate, MigrateCommand
 from flask_script import Manager
 from info import create_app
-from info import db
+from info import db ,models
+
+
 '''
     这个模块专门提供启动程序的逻辑.
 '''

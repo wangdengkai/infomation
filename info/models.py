@@ -42,7 +42,7 @@ class User(BaseModel,db.Model):
     #用户编号
     id = db.Column(db.Integer,primary_key=True)
     # 用户昵称
-    nick_name = db.column(db.String(32),unique=True,nullable=False)
+    nick_name = db.Column(db.String(32),unique=True,nullable=False)
     #加密密码
     password_hash = db.Column(db.String(128),nullable=False)
     #手机号
