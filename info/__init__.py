@@ -8,6 +8,7 @@ from flask_wtf import CSRFProtect
 from redis import StrictRedis
 
 from config import config
+from info.models.index import index_blu
 
 '''
     info模块,是具体业务模块,实现相关业务.
@@ -44,5 +45,8 @@ def create_app(config_name):
 
     #设置session保存位置
     Session(app)
+
+    #注册蓝图
+    app.register_blueprint(index_blu)
 
     return app
