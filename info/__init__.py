@@ -8,7 +8,7 @@ from flask_wtf import CSRFProtect
 from redis import StrictRedis
 
 from config import config
-from info.models.index import index_blu
+
 
 '''
     info模块,是具体业务模块,实现相关业务.
@@ -16,7 +16,10 @@ from info.models.index import index_blu
 #初始化数据库,
 # 在flask很多拓展里面都可以先初始化托找的对象,然后调用init_appfangfa 初始化
 db = SQLAlchemy()
-
+#第一种方式,指定类型,仅仅是为了方便开发.
+redis_store = None #type:StrictRedis
+#第二种方式:
+# redis_store:StrictRedis = None
 def setup_log(config_name):
     # 设置日志的记录等级
     logging.basicConfig(level=config[config_name].LOG_LEVEL) # 调试debug级
@@ -37,6 +40,7 @@ def create_app(config_name):
     #初始化db
     db.init_app(app)
 
+    global redis_store
     #初始化redis,存储表单
     redis_store = StrictRedis(host=config[config_name].REDIS_HOST,port =config[config_name].REDIS_PORT)
 
@@ -47,6 +51,7 @@ def create_app(config_name):
     Session(app)
 
     #注册蓝图
+    from info.models.index import index_blu
     app.register_blueprint(index_blu)
 
     return app
