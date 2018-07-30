@@ -33,9 +33,17 @@ $(function(){
 
 
 	// 点击输入框，提示文字上移
-	$('.form_group').on('click focusin',function(){
-		$(this).children('.input_tip').animate({'top':-5,'font-size':12},'fast').siblings('input').focus().parent().addClass('hotline');
-	})
+	// $('.form_group').on('click focusin',function(){
+	// 	$(this).children('.input_tip').animate({'top':-5,'font-size':12},'fast').siblings('input').focus().parent().addClass('hotline');
+	// })
+    $('.form_group').on('click',function(){
+        $(this).children('input').focus()
+    })
+
+    $('.form_group input').on('focusin',function(){
+        $(this).siblings('.input_tip').animate({'top':-5,'font-size':12},'fast')
+        $(this).parent().addClass('hotline');
+    })
 
 	// 输入框失去焦点，如果输入框为空，则提示文字下移
 	$('.form_group input').on('blur focusout',function(){
@@ -155,7 +163,7 @@ function generateImageCode() {
     // 生成imagecodeid
     imageCodeId = generateUUID()
     // #生成url
-    var url = '/image_code?imageCodeId='+imageCodeId
+    var url = '/passport/image_code?imageCodeId='+imageCodeId
     //设置img变迁设置src
     $('.get_pic_code').attr('src',url)
 }

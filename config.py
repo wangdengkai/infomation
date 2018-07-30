@@ -17,7 +17,7 @@ class Config(object):
     REDIS_HOST ='127.0.0.1'
     REDIS_PORT =6379
     #指定session保存的redis
-    SESSION_REDIS = StrictRedis(host=REDIS_HOST,port=REDIS_PORT)
+    SESSION_REDIS = StrictRedis()
 
     #Session保存位置
     SESSION_TYPE='redis'
