@@ -1,9 +1,79 @@
+import random
+import re
+from datetime import datetime
 
-from flask import request, abort, current_app, make_response
+from flask import request, abort, current_app, make_response, jsonify, session
 
-from info import redis_store, constants
+from info import redis_store, constants, db
+from info.libs.yuntongxun.sms import CCP
+from info.models import User
+from info.utils.response_code import RET
 from . import passport_blu
 from info.utils.captcha.captcha import  captcha
+
+
+@passport_blu.route('/sms_code',methods=['POST'])
+def send_sms_code():
+    '''
+    发送短信的逻辑
+    1 获取参数:手机号,图片验证码内容,图片验证码的编号
+    2  校验参数(参数是否符合规则,判断是否有值
+    3   先从redis中取出验证码内容,与用户的验证码内容对比.
+    4   如果对比不一致,那么验证码输入错误.
+    5   如果一直,生成验证码内容
+    6   发送验证码
+    7   告知发送结果.
+    :return:
+    '''
+    # 1 获取参数:手机号,图片验证码内容,图片验证码的编号
+    params_dict = request.json
+
+    mobile = params_dict.get("mobile",None)
+    image_code =params_dict.get('image_code',None)
+    image_code_id = params_dict.get("image_code_id",None)
+    # 2  校验参数(参数是否符合规则,判断是否有值
+    if not all([mobile,image_code,image_code_id]):
+        #没有值就返回错误
+        #{"errno":4100,"errmsg":"参数有无'}
+        return jsonify(errno=RET.PARAMERR,errmsg="参数错误")
+    #检测手机是欧服正确
+    if not re.match(r'1[35678]\d{9}$',mobile):
+        return jsonify(errno=RET.PARAMERR,errmsg="手机号有错误")
+    # 3   先从redis中取出验证码内容,与用户的验证码内容对比.
+    try:
+        real_image_code = redis_store.get("ImageCodeId_"+image_code_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmag="查询数据失败")
+    if not real_image_code:
+        return jsonify(errno=RET.NODATA,errmsg="图片验证码过期")
+
+    # 4   如果对比不一致,那么验证码输入错误.
+    if real_image_code.upper() != image_code.upper():
+        return jsonify(errno=RET.DBERR,errmsg="验证码输入错误")
+    # 5   如果一直,生成验证码内容
+    #随机数字,保证数字长度为6为3,不够再前面不上0.
+    sms_code_str="%06d" % random.randint(0,999999)
+    current_app.logger.debug("短信验证码是%s" % sms_code_str)
+    # 6   发送验证码
+    result = CCP().send_template_sms(mobile,[sms_code_str,constants.SMS_CODE_REDIS_EXPIRES/60 ],1)
+    if result != 0 :
+        #代表发送不成功
+        return jsonify(errno=RET.THIRDERR,errmsg="发送短信失败")
+
+    #保存验证码到redis中
+    try:
+        redis_store.set('SMS_'+mobile,sms_code_str)
+        redis_store.expire('SMS_'+mobile,constants.SMS_CODE_REDIS_EXPIRES)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="数据存储错误")
+
+    # 7   告知发送结果.
+    return jsonify(errno=RET.OK,errmsg="发送成功")
+
+
+
 @passport_blu.route('/image_code')
 def get_image_code():
     '''
@@ -42,3 +112,74 @@ def get_image_code():
     #设置浏览器类型
     response.headers['Content-Type'] = 'image/jpg'
     return response
+
+
+
+@passport_blu.route("/register",methods=["POST"])
+def register():
+    '''
+    注册的逻辑
+    1 获取参数
+    2 校验参数
+    3 娶到服务器保存的真实的短信验证码内容
+    4 校验用户输入的短信验证码内容和正式验证码内容是否一致
+    5 如果一直,出水啊User模型,并且属性
+    6 将user保存到模型数据库
+    7 返回响应
+    :return:
+    '''
+    param_dict = request.json
+    moble = param_dict.get("mobile")
+    sms_code = param_dict.get("smscode")
+    password = param_dict.get('password')
+
+    if not all([moble,sms_code,password]):
+        # 参数不全
+        return jsonify(errno=RET.PARAMERR,errmsg="参数不足")
+
+    if not re.match(r'1[35678]\d{9}',moble):
+        return jsonify(errno=RET.PARAMERR,errmsg="手机号格式不想正确")
+
+    try:
+        real_sms_code = redis_store.get("SMS_"+moble)
+    except Exception as e:
+        return jsonify(errno=RET.DBERR,errmsg="获取本地验证码失败")
+
+
+    if not real_sms_code:
+        return jsonify(errno=RET.NODATA,errmsg="短信验证码已经过期")
+    # 3. 校验验证码
+    if real_sms_code.upper()  != sms_code.upper():
+        return  jsonify(errno=RET.PARAMERR,errmsg="短信验证码错误")
+    #删除短信验证码
+    try:
+        redis_store.delete('SMS_'+moble)
+    except Exception as e:
+        current_app.logger.error(e)
+    # 4. 初始化 user 模型，并设置数据并添加到数据库
+    user = User()
+    user.mobile =moble
+    user.nick_name = moble
+    user.last_login = datetime.now()
+
+    #TODO 对密码进行处理
+    user.password = password
+
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        #数据爆粗你失败,回滚
+        db.session.rollback()
+        current_app.logger.error(e)
+
+        return jsonify(errno=RET.DBERR,errmsg="数据保存失败")
+
+        # 5. 保存用户登录状态
+    session['user_id'] = user.id
+    session['mobile'] = user.mobile
+    session['nick_name'] =user.nick_name
+
+
+
+    return jsonify(errno=RET.OK,errmsg="注册成功")
