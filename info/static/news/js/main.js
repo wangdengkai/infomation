@@ -38,12 +38,20 @@ $(function(){
 	// })
     $('.form_group').on('click',function(){
         $(this).children('input').focus()
+        // $("#register-mobile-err").hide();
+    })
+    $('#register_mobile').on('focusin',function(){
+        $("#register-mobile-err").hide();
+
+
     })
 
     $('.form_group input').on('focusin',function(){
         $(this).siblings('.input_tip').animate({'top':-5,'font-size':12},'fast')
         $(this).parent().addClass('hotline');
+        //
     })
+
 
 	// 输入框失去焦点，如果输入框为空，则提示文字下移
 	$('.form_group input').on('blur focusout',function(){

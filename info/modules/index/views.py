@@ -1,6 +1,6 @@
 from flask import render_template, current_app, session
 
-from info.models import User
+from info.models import User, News
 from . import index_blu
 
 
@@ -13,6 +13,8 @@ def index():
     2 将但钱用户已经登录,将当前用户的数据传到模板中,共模板显示.
     :return:
     '''
+
+    # 显示用户是否登录的逻辑
     user_id = session.get("user_id",None)
     user=None
     if user_id:
@@ -21,8 +23,21 @@ def index():
         except Exception as e:
             current_app.logger.error(e)
 
+    #右侧新闻的排行的逻辑
+    news_list = []
+    try:
+        news_list = News.query.order_by(News.clicks.desc()).limit(6)
+    except Exception as e:
+        current_app.logger.error(e)
+    #定义一个空的字典列表,里面装的就是字典里诶包
+    news_dict_li = []
+    #遍历对象列表,将对象字典,添加到字典列表中
+    for news in news_list:
+        news_dict_li.append(news.to_basic_dict())
     data={
-        'user':user.to_dict() if user else None
+        'user':user.to_dict() if user else None,
+        'news_dict_li':news_dict_li
+
     }
 
 
