@@ -1,5 +1,6 @@
 from flask import render_template, current_app, session
 
+from info import constants
 from info.models import User, News
 from . import index_blu
 
@@ -26,7 +27,7 @@ def index():
     #右侧新闻的排行的逻辑
     news_list = []
     try:
-        news_list = News.query.order_by(News.clicks.desc()).limit(6)
+        news_list = News.query.order_by(News.clicks.desc()).limit(constants.HOME_PAGE_MAX_NEWS).all()
     except Exception as e:
         current_app.logger.error(e)
     #定义一个空的字典列表,里面装的就是字典里诶包
