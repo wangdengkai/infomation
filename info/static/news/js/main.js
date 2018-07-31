@@ -132,8 +132,9 @@ $(function(){
                     //
                     location.reload()
                 }else{
-                    $("#register-password-err").html(resp.errmsg)
-                    $("#register-password-err").show()
+
+                    $("#login-password-err").html(resp.errmsg)
+                    $("#login-password-err").show()
 
                 }
 
@@ -225,8 +226,8 @@ function sendSMSCode() {
     }
     var imageCode = $("#imagecode").val();
     if (!imageCode) {
-        $("#image-code-err").html("请填写验证码！");
-        $("#image-code-err").show();
+        $("#register-image-code-err").html("请填写验证码！");
+        $("#register-image-code-err").show();
         $(".get_code").attr("onclick", "sendSMSCode();");
         return;
     }
@@ -268,6 +269,7 @@ function sendSMSCode() {
             }else{
                 //发送失败
                 alert(response.errmsg)
+                $(".get_code").attr("onclick", "sendSMSCode();");
             }
         }
     })
@@ -306,4 +308,11 @@ function generateUUID() {
         return (c=='x' ? r : (r&0x3|0x8)).toString(16);
     });
     return uuid;
+}
+
+
+function logout(){
+    $.get("/passport/logout",function(resp){
+        location.reload()
+    })
 }

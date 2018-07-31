@@ -55,11 +55,12 @@ def send_sms_code():
     #随机数字,保证数字长度为6为3,不够再前面不上0.
     sms_code_str="%06d" % random.randint(0,999999)
     current_app.logger.debug("短信验证码是%s" % sms_code_str)
+
     # 6   发送验证码
-    result = CCP().send_template_sms(mobile,[sms_code_str,constants.SMS_CODE_REDIS_EXPIRES/60 ],1)
-    if result != 0 :
+    # result = CCP().send_template_sms(mobile,[sms_code_str,constants.SMS_CODE_REDIS_EXPIRES/60 ],1)
+    # if result != 0 :
         #代表发送不成功
-        return jsonify(errno=RET.THIRDERR,errmsg="发送短信失败")
+        # return jsonify(errno=RET.THIRDERR,errmsg="发送短信失败")
 
     #保存验证码到redis中
     try:
@@ -217,8 +218,7 @@ def login():
 
 
     if not user:
-        jsonify(erno=RET.NODATA,errmsg="用户不存在")
-
+        return jsonify(erno=RET.NODATA,errmsg="用户不存在")
 
     if not user.check_passowrd(password):
         return jsonify(erno=RET.PWDERR,errmsg="用户密码错误")
@@ -228,8 +228,35 @@ def login():
     session['mobile'] = user.mobile
     session['nick_name'] =user.nick_name
 
+    user.last_login = datetime.now()
 
-    return jsonify(erno=RET.OK,errmsg="登录成功")
+
+    # try:
+    #     db.session.commit()
+    # except Exception as e:
+    #     db.session.rollback()
+    #     current_app.logger.error(e)
+    #
+    #     return jsonify(errno=RET.NODATA,errmsg="登录事件2修改失败")
+
+
+    return jsonify(errno=RET.OK,errmsg="登录成功")
+
+
+@passport_blu.route('/logout')
+def logout():
+    '''
+    退出功能
+    清理session
+    :return:
+    '''
+    #溢出session中的数据(dict)
+    #pop 会有一个返回值,如果要溢出dekey不存在,
+    session.pop('user_id',None)
+    session.pop('mobile',None)
+    session.pop('nick_name',None)
+
+    return jsonify(errno=RET.OK,errmsg="退出成功")
 
 
 

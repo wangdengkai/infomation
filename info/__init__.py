@@ -45,7 +45,7 @@ def create_app(config_name):
     redis_store = StrictRedis(host=config[config_name].REDIS_HOST,port =config[config_name].REDIS_PORT,decode_responses=True)
 
     #开启当前项目CSRF保护,制作服务器验证功能,cookie中的csrf_token和表单csrf_token需要我们自己实现..
-    # CSRFProtect(app)
+    CSRFProtect(app)
 
     #设置session保存位置
     Session(app)
