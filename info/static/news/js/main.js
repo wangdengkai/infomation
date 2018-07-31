@@ -125,7 +125,11 @@ $(function(){
         $.ajax({
             url:'/passport/login',
             type:'post',
+            //在header中天机scrftoken的随机值.
             contentType:'application/json',
+            headers:{
+                'X-CSRFToken':getCookie('csrf_token')
+            },
             data:JSON.stringify(params),
             success:function(resp){
                 if(resp.errno=='0'){
@@ -184,6 +188,9 @@ $(function(){
             url:'/passport/register',
             type:'post',
             contentType:'application/json',
+            headers:{
+                'X-CSRFToken':getCookie('csrf_token')
+            },
             data:JSON.stringify(params),
             success:function(resp){
                 if(resp.errno =='0'){
@@ -248,6 +255,9 @@ function sendSMSCode() {
         data:JSON.stringify(params),
         //请求数据类
         contentType:'application/json',
+        headers:{
+            'X-CSRFToken':getCookie('csrf_token')
+        },
         //发送成功后
         success:function(response){
             if (response.errno == '0'){

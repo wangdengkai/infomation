@@ -5,6 +5,7 @@ from flask import Flask
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
+from flask_wtf.csrf import generate_csrf
 from redis import StrictRedis
 
 from config import config
@@ -45,10 +46,20 @@ def create_app(config_name):
     redis_store = StrictRedis(host=config[config_name].REDIS_HOST,port =config[config_name].REDIS_PORT,decode_responses=True)
 
     #开启当前项目CSRF保护,制作服务器验证功能,cookie中的csrf_token和表单csrf_token需要我们自己实现..
+    #
     CSRFProtect(app)
 
     #设置session保存位置
     Session(app)
+
+    @app.after_request
+    def after_request(response):
+        #生成随机的csrftoken
+        csrf_token=generate_csrf()
+        #设置一个csrf
+        response.set_cookie("csrf_token",csrf_token)
+
+        return response
 
     #注册蓝图
     from info.modules.index import index_blu
