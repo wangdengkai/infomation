@@ -163,6 +163,7 @@ def register():
     user.last_login = datetime.now()
 
     #TODO 对密码进行处理
+    #
     user.password = password
 
     try:
@@ -183,3 +184,54 @@ def register():
 
 
     return jsonify(errno=RET.OK,errmsg="注册成功")
+
+
+@passport_blu.route('/login',methods=['POST'])
+def login():
+    '''
+    登录
+    1 虎丘参数
+    2 J校验参数
+    3  校验密码是否正确
+    4   保存用户的登录状态
+    5   响应
+    :return:
+    '''
+
+    params_dict = request.json
+
+    mobile =params_dict.get("mobile")
+    password=params_dict.get("password")
+
+    if not all([mobile,password]):
+        return jsonify(erno=RET.PARAMERR,errmsg="参数错误")
+    #校验手机号师傅zehngque
+    if not re.match(r'1[35678]\d{9}',mobile):
+        return jsonify(errno=RET.PARAMERR,errmsg="手机号格式不想正")
+
+    try:
+        user =User.query.filter(User.mobile == mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(erno=RET.PARAMERR,errmsg="数据查询失败")
+
+
+    if not user:
+        jsonify(erno=RET.NODATA,errmsg="用户不存在")
+
+
+    if not user.check_passowrd(password):
+        return jsonify(erno=RET.PWDERR,errmsg="用户密码错误")
+
+
+    session['user_id'] =user.id
+    session['mobile'] = user.mobile
+    session['nick_name'] =user.nick_name
+
+
+    return jsonify(erno=RET.OK,errmsg="登录成功")
+
+
+
+
+
