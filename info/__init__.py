@@ -10,7 +10,7 @@ from redis import StrictRedis
 
 from config import config
 
-from info.utils.common import do_index_class
+
 
 '''
     info模块,是具体业务模块,实现相关业务.
@@ -53,6 +53,8 @@ def create_app(config_name):
     #设置session保存位置
     Session(app)
 
+    from info.utils.common import do_index_class
+    from info.utils.common import  user_login_data
     #添加过滤器
     app.add_template_filter(do_index_class,"indexclass")
 
