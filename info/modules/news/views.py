@@ -76,6 +76,7 @@ def collect_news():
     :return:
     '''
     user =g.user
+    #判断是否登录
     if not user:
         return jsonify(errno=RET.SESSIONERR,errmsg="用户没有登录")
     # 1 接受参数u
