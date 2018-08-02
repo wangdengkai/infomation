@@ -43,13 +43,20 @@ def news_detail(news_id):
         abort(404)
 
     #更新新闻点击次数
-
     news.clicks +=1
+
+    # 用户收藏
+    is_collected = False
+    if user:
+        if news  in user.collection_news:
+            is_collected=True
+
 
     data={
         'user':user.to_dict() if user else None,
         'news_dict_li':news_dict_li,
-        "news":news.to_dict()
+        "news":news.to_dict(),
+        'is_collected':is_collected
 
 
     }
