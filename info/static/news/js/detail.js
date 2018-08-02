@@ -259,5 +259,6 @@ $(function(){
 function updatecommonCount(){
     var count = $(".comment_list").length
     $(".comment_count").html(count+"条评论")
+    $(".detail_about .comment").html(count)
 
 }

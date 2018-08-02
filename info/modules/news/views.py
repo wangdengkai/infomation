@@ -1,7 +1,7 @@
 from flask import render_template, session, current_app, g, abort, request, jsonify
 
 from info import constants, db
-from info.models import User, News, Comment
+from info.models import User, News, Comment, CommentLike
 from info.utils.response_code import RET
 
 from . import news_blu
@@ -179,3 +179,68 @@ def add_news_comment():
         return jsonify(errno=RET.DATAERR,errmsg='数据存储错误')
 
     return jsonify(errno=RET.OK,errmsg="评论成功",data=comment.to_dict())
+
+
+@news_blu.route("/comment_like",methods=["POST"])
+@user_login_data
+def comment_like():
+    '''
+    评论点赞
+
+    :return:
+    '''
+    user = g.user
+
+    if not user:
+        return jsonify()
+
+    #娶到参数
+    comment_id =request.json.get(['comment_id'])
+    news_id = request.json.get(["news_id"])
+    action = request.json.get("action")
+
+    if not all([comment_id,news_id,action]):
+        return jsonify(errno=RET.PARAMERR,errmsg="参数错误")
+
+    if action not in ['add','remove']:
+        return jsonify(errno=RET.PARAMERR,errmsg="参数错误")
+
+    try:
+        comment_id = int(comment_id)
+        news_id = int(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR,errmsg="参数错误")
+
+    try:
+        comment = Comment.query.get(comment_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="数据查询错误")
+
+    if not comment:
+        return  jsonify(errno=RET.NODATA,errmsg="评论不存在")
+
+    if action == "add":
+        #添加点赞
+        comment_like_model = CommentLike()
+        comment_like_model.user_id =user.id
+        comment_like_model.comment_id = comment_id
+        if not comment_like_model:
+            db.session.add(comment_like_model)
+
+
+    else:
+        #取消点赞
+        comment_like_model=CommentLike.query.filter(CommentLike.user_id==user.id,CommentLike.comment_id==comment_id).first()
+        if comment_like_model:
+            comment_like_model.delete()
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR,errmsg="数据库操作失败")
+
+    return jsonify(errno=RET.OK,errmsg="OK")
+
