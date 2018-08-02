@@ -133,11 +133,11 @@ def add_news_comment():
     #1 娶到请求参数
     data_dict = request.json
     news_id = data_dict.get("news_id")
-    comment = data_dict.get("comment")
+    comment_content = data_dict.get("comment")
     parent_id = data_dict.get("parent_id")
-    comment_content=data_dict.get("comment_content")
+
     #判断参数
-    if not all([news_id,comment]):
+    if not all([news_id,comment_content]):
         return jsonify(errno=RET.PARAMERR,errmsg="参数错误")
 
     try:
@@ -168,4 +168,4 @@ def add_news_comment():
         db.session.rollback()
         return jsonify(errno=RET.DATAERR,errmsg='数据存储错误')
 
-    return jsonify(errno=RET.OK,errmsg="评论成功",comment=comment.to_dict())
+    return jsonify(errno=RET.OK,errmsg="评论成功",data=comment.to_dict())
