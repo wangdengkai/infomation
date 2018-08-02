@@ -1,7 +1,7 @@
 from flask import render_template, session, current_app, g, abort, request, jsonify
 
-from info import constants
-from info.models import User, News
+from info import constants, db
+from info.models import User, News, Comment
 from info.utils.response_code import RET
 
 from . import news_blu
@@ -116,4 +116,56 @@ def collect_news():
 
     return jsonify(errno=RET.OK,errmsg="操作成功")
 
+@news_blu.route("/news_comment",methods=['POST'])
+@user_login_data
+def add_news_comment():
+    '''
+    评论新闻或者回复某条新闻条件下的是否存在
 
+    '''
+
+    user = g.user
+
+    if not user:
+        return jsonify(errno=RET.SESSIONERR,errmsg="用户未登录")
+
+
+    #1 娶到请求参数
+    data_dict = request.json
+    news_id = data_dict.get("news_id")
+    comment = data_dict.get("comment")
+    parent_id = data_dict.get("parent_id")
+    comment_content=data_dict.get("comment_content")
+    #判断参数
+    if not all([news_id,comment]):
+        return jsonify(errno=RET.PARAMERR,errmsg="参数错误")
+
+    try:
+        news_id =int(news_id)
+        if parent_id:
+            parent_id = int(parent_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR,errmsg="参数错误")
+
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        return jsonify(errno=RET.DBERR,errmsg="数据查询错误")
+    #初始化评论模型,并复制
+    comment = Comment()
+    comment.user_id = user.id
+    comment.news_id =news_id
+    comment.content = comment_content
+    if parent_id:
+        comment.parent_id = parent_id
+    #提交评论,虽然有自动提交功能,但是为了提前使用提交的数据的id,所以需要自己手动提交
+    try:
+        db.session.add(comment)
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+        return jsonify(errno=RET.DATAERR,errmsg='数据存储错误')
+
+    return jsonify(errno=RET.OK,errmsg="评论成功",comment=comment.to_dict())
