@@ -1,10 +1,12 @@
-var currentCid = 0; // 当前分类 id
+var currentCid = 1; // 当前分类 id
 var cur_page = 1; // 当前页
 var total_page = 1;  // 总页数
 var data_querying = true;   // 是否正在向后台获取数据
 
 
 $(function () {
+    //界面加载新闻数据
+    updateNewsData()
     // 首页分类切换
     $('.menu li').click(function () {
         var clickCid = $(this).attr('data-cid')
@@ -41,10 +43,57 @@ $(function () {
 
         if ((canScrollHeight - nowScroll) < 100) {
             // TODO 判断页数，去更新新闻数据
+
+            if(!data_querying){
+                data_querying = true
+                //取加载数据,如果当前页数小于总页数,那么J就停止加载页数
+                if (cur_page < total_page){
+                    cur_page +=1
+                    updateNewsData()
+
+                }
+            }
+
+
         }
     })
 })
 
 function updateNewsData() {
     // TODO 更新新闻数据
+    var params ={
+        'cid':currentCid,
+        'page':cur_page,
+    }
+
+    $.get("/news_list",params,function(resp){
+
+        data_querying = false
+            if(resp.errno == '0'){
+                ///请求成功
+                total_page = resp.data.total_page
+                //清除内容
+                if(cur_page == '1'){
+                    $(".list_con").html("")
+                }
+
+                //
+                for (var i=0;i<resp.data.newsList.length;i++) {
+                    var news = resp.data.newsList[i]
+                    var content = '<li>'
+                    content += '<a href="/news/' + news.id +' " class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>'
+                    content += '<a href=/news/' + news.id +' " class="news_title fl">' + news.title + '</a>'
+                    content += '<a href="/news/' + news.id +'" class="news_detail fl">' + news.digest + '</a>'
+                    content += '<div class="author_info fl">'
+                    content += '<div class="source fl">来源：' + news.source + '</div>'
+                    content += '<div class="time fl">' + news.create_time + '</div>'
+                    content += '</div>'
+                    content += '</li>'
+                    $(".list_con").append(content)
+                }
+            }else{
+                //请求失败
+                alert(resp.errmsg)
+            }
+    })
 }

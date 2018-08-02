@@ -9,6 +9,7 @@ from flask_wtf.csrf import generate_csrf
 from redis import StrictRedis
 
 from config import config
+
 from info.utils.common import do_index_class
 
 '''
@@ -70,6 +71,9 @@ def create_app(config_name):
 
     from info.modules.passport import passport_blu
     app.register_blueprint(passport_blu)
+
+    from info.modules.news import news_blu
+    app.register_blueprint(news_blu)
 
 
     return app
