@@ -69,7 +69,12 @@
                     </div>
                 {% endif %}
                 <div class="comment_time fl">{{ comment.create_time }}</div>
-                <a href="javascript:;" class="comment_up{%  if comment.is_like  %} has_comment_up {% endif %} fr" data-commentid="{{ comment.id }}" data-newsid="{{ comment.news_id }}" data-likecount="{{ comment.like_count }}">{% if comment.like_count >0  %} {{ comment.like_count }}{% else %}赞{% endif %}</a>
+                <a href="javascript:;" class="comment_up{%  if comment.is_like  %} has_comment_up {% endif %} fr" data-commentid="{{ comment.id }}" data-newsid="{{ comment.news_id }}" data-likecount="{{ comment.like_count }}">
+                    {% if comment.like_count > 0  %}
+                        {{ comment.like_count }}
+                    {% else %}
+                        赞
+                    {% endif %}</a>
                 <a href="javascript:;" class="comment_reply fr">回复</a>
                 <form class="reply_form fl" data-commentid="{{ comment.id }}" data-newsid="{{ data.news.id }}">
                     <textarea class="reply_input"></textarea>
@@ -82,6 +87,18 @@
     </div>
 
 {% endblock contentBlock %}
+
+{%  block rankBlock %}
+    <div class="rank_title">
+        <h3>点击排行</h3>
+    </div>
+    <ul class="rank_list">
+        {%  for news in data.news_dict_li %}
+            <li><span class="{{ loop.index0 | indexclass }}">{{ loop.index }}</span><a href="#">{{ news.title }}</a></li>
+        {%  endfor %}
+
+    </ul>
+{% endblock rankBlock %}
 
 {% block authorBlock %}
     <div class="author_card">

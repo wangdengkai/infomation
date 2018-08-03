@@ -53,24 +53,16 @@
 
 {% endblock contentBlock %}
 
-{% block rankBlock %}
+
     <div class="rank_con fr">
         {%  block authorBlock %}
 
         {%  endblock %}
-    {%  block ranklistBlock %}
-        <div class="rank_title">
-            <h3>点击排行</h3>
-        </div>
-        <ul class="rank_list">
-            {%  for news in data.news_dict_li %}
-                <li><span class="{{ loop.index0 | indexclass }}">{{ loop.index }}</span><a href="#">{{ news.title }}</a></li>
-            {%  endfor %}
+    {%  block rankBlock %}
 
-        </ul>
-    {% endblock ranklistBlock %}
+    {% endblock rankBlock %}
     </div>
-{% endblock rankBlock %}
+
 
 </div>
 <div class="footer">
