@@ -78,10 +78,7 @@ def pic_info():
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.THIRDERR,errmsg="上传图片错误")
-    try:
-        db.session.commit()
-    except Exception as e:
-        current_app.lgger.error(e)
-        db.session.rollback()
-        return jsonify(errno=RET.OK,errmsg="OK",data={"avatar_url":constants.QINIU_DOMIN_PREFIX + url})
+    #保存头像地址
+    user.avatar_url = url
+    return jsonify(errno=RET.OK,errmsg="OK",data={"avatar_url":constants.QINIU_DOMIN_PREFIX + url})
 
