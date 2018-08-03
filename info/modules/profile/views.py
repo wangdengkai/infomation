@@ -228,7 +228,7 @@ def news_release():
         db.session.rollback()
 
         return jsonify(errno=RET.DBERR,errmsg="保存数据失败")
-
+    print(news.id)
     #返回结果
     return jsonify(errno=RET.OK,errmsg="发布成功,等待审核")
 
