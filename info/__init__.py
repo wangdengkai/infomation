@@ -1,7 +1,7 @@
 import logging
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask
+from flask import Flask, g, render_template
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
@@ -66,9 +66,14 @@ def create_app(config_name):
         csrf_token=generate_csrf()
         #设置一个csrf
         response.set_cookie("csrf_token",csrf_token)
-
-
         return response
+    @app.errorhandler(404)
+    @user_login_data
+    def page_not_fount(*args,**kwargs):
+        user =g.user
+
+        data = {'user':user.to_dict() if user else None}
+        return render_template('news/404.html',data=data)
 
     #注册蓝图
     from info.modules.index import index_blu
@@ -81,6 +86,9 @@ def create_app(config_name):
     app.register_blueprint(news_blu)
     from info.modules.profile import profile_blu
     app.register_blueprint(profile_blu)
+
+
+
 
 
     return app
