@@ -82,3 +82,26 @@ def pic_info():
     user.avatar_url = url
     return jsonify(errno=RET.OK,errmsg="OK",data={"avatar_url":constants.QINIU_DOMIN_PREFIX + url})
 
+
+@profile_blu.route("/pass_info",methods=['POST','GET'])
+@user_login_data
+def pass_info():
+    if request.method == 'GET':
+        return render_template('news/user_pass_info.html')
+
+    #获取参数
+    new_password =request.json.get("new_password")
+    old_password = request.json.get('old_password')
+
+    #校验参数
+    if not all([old_password,new_password]):
+        return jsonify(errno=RET.PARAMERR,errmsg="参数错误")
+
+    #判断就密码是欧服正确
+    user = g.user
+    if not user.check_passowrd(old_password):
+        return jsonify(errno=RET.PWDERR,errmsg="密码错误")
+
+    #设置新密码
+    user.password = new_password
+    return jsonify(errno=RET.OK,errmsg="修改密码成功")
