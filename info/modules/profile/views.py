@@ -1,6 +1,7 @@
 from flask import render_template, redirect, g, request, jsonify, current_app, session
 
 from info import db, constants
+from info.models import Category, News
 from info.modules.profile import profile_blu
 from info.utils.common import user_login_data
 from info.utils.image_storage import storage
@@ -146,4 +147,136 @@ def user_collection():
     }
 
     return render_template('news/user_collection.html',data=data)
+
+@profile_blu.route("/news_release",methods=["POST","GET"])
+@user_login_data
+def news_release():
+    if request.method == "GET":
+
+        categories = []
+
+        try:
+            #获取所有的分类数据
+            categories = Category.query.order_by(Category.id).all()
+        except Exception as e:
+            current_app.logger.error(e)
+
+
+        #定义列表保存分类数据
+        categories_dicts = []
+
+        for category in categories:
+            #获取字典
+            cate_dict = category.to_dict()
+            #拼接内容
+            categories_dicts.append(cate_dict)
+
+
+        #溢出,最新分类
+        categories_dicts.pop(0)
+        #返回内容
+
+        return render_template("news/user_news_release.html",data={"categories":categories_dicts})
+
+    #post提交
+    #获取提交的数据
+    title = request.form.get("title")
+    source = "个人发布"
+    digest = request.form.get('digest')
+    content = request.form.get("content")
+    index_image = request.files.get("index_image")
+    category_id = request.form.get("category_id")
+
+    #判断是否有值
+    if not all([title,source,digest,content,index_image,category_id]):
+        return jsonify(errno=RET.PARAMERR,errmsg="参数有无")
+
+    #尝试读取图片
+    try:
+        index_image = index_image.read()
+    except Exception as e:
+        current_app.logger.error(e)
+
+        return jsonify(errno=RET.PARAMERR,errmsg="参数有无")
+
+    #将标题图片上传到骑牛
+    try:
+        key = storage(index_image)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.THIRDERR,errmsg="上传图片错误")
+
+
+    #3初始化新闻模型,并设置相关数据
+    news = News()
+    news.title  = title
+    news.digest = digest
+    news.source = source
+    news.content = content
+    news.index_image_url = constants.QINIU_DOMIN_PREFIX+key
+    news.category_id = category_id
+    news.user_id = g.user.id
+
+    #1 代表审核状态
+    news.status = 1
+    #保存到数据库
+    try:
+        db.session.add(news)
+        db.session.commit()
+    except Exception as e:
+        current_app.logger.error(e)
+        db.session.rollback()
+
+        return jsonify(errno=RET.DBERR,errmsg="保存数据失败")
+
+    #返回结果
+    return jsonify(errno=RET.OK,errmsg="发布成功,等待审核")
+
+@profile_blu.route('/news_list')
+@user_login_data
+def news_list():
+    #获取页数
+    p  = request.args.get("p",1)
+    try:
+        p = int(p)
+
+    except Exception as e:
+        current_app.logger.error(e)
+        p = 1
+
+    user =g.user
+    news_li = []
+    current_page =  1
+    total_page = 1
+    try:
+        paginate = News.query.filter(News.user_id == user.id).paginate(p,constants.USER_COLLECTION_MAX_NEWS,False)
+        #获取当前页的数据u
+        news_li = paginate.items
+        #获取当前也饿的
+        current_page = paginate.page
+        #获取总页数
+        total_page = paginate.pages
+    except Exception as e:
+        current_app.logger.error(e)
+
+    news_dict_li = []
+
+    for news_item in news_li:
+        news_dict_li.append(news_item.to_review_dict())
+
+
+    data = {'news_list':news_dict_li,'total_page':total_page,'current_page':current_page}
+
+    return  render_template('news/user_news_list.html',data=data)
+
+
+
+
+
+
+
+
+
+
+
 
