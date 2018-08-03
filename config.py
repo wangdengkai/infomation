@@ -32,6 +32,8 @@ class Config(object):
     #设置日志等级
     LOG_LEVEL = logging.DEBUG
 
+    QINIU_DOMIN_PREFIX = "http://oyucyko3w.bkt.clouddn.com/"
+
 class DevelopmentConfig(Config):
     '''开发环境下的配置'''
     DEBUG = True

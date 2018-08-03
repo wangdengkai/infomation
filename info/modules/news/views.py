@@ -6,6 +6,7 @@ from info.utils.response_code import RET
 
 from . import news_blu
 from info.utils.common import user_login_data
+from flask import url_for
 
 
 @news_blu.route("/<int:news_id>")

@@ -141,7 +141,8 @@ def user_collection():
     data = {
         'total_page':total_page,
         'current_page':current_page,
-        'collections':news_dict_li
+        'collections':news_dict_li,
+
     }
 
     return render_template('news/user_collection.html',data=data)

@@ -58,12 +58,15 @@ def create_app(config_name):
     #添加过滤器
     app.add_template_filter(do_index_class,"indexclass")
 
+
+
     @app.after_request
     def after_request(response):
         #生成随机的csrftoken
         csrf_token=generate_csrf()
         #设置一个csrf
         response.set_cookie("csrf_token",csrf_token)
+
 
         return response
 

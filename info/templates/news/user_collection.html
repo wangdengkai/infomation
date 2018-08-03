@@ -18,12 +18,7 @@
                     <li><a href="/news/{{ news.id }}" target="_blank">{{ news.title }}</a><span>{{ news.create_time }}</span></li>
                 {% endfor %}
             </ul>
-{#            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>#}
-{#            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>#}
-{#            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>#}
-{#            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>#}
-{#            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>#}
-{#            <li><a href="#">智能音箱“不智能”：这次轮到三星语音助手Bixby被吐槽了</a><span>2018-1-17</span></li>#}
+
         </ul>
 
 
@@ -36,7 +31,7 @@
                     totalPage: {{ data.total_page }},
                     callback: function(current) {
 {#                        alert('ok!');#}
-                        location.href="/profile/collection?page="+currentPage
+                        location.href="/user/collection?p="+current
                     }
                 });
             });
