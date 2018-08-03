@@ -59,9 +59,37 @@ def news_detail(news_id):
     except Exception as e:
         current_app.logger.error(e)
         # return jsonify(errno=RET.DATAERR,errmsg="查询评论失败")
+
+    #查询出用户在当前新闻都点赞了那些评论
+    comment_like_ids=[]
+    if g.user:
+        #如果当前用户已经登录
+        try:
+            comment_ids =[comment.id for comment in comments]
+            if len(comment_ids) > 0:
+                #娶到当前用户在当前新闻的所有评论点赞的记录
+                comment_likes =Comment.query.filter(CommentLike.comment_id.in_(comment_ids),
+                                                    CommentLike.user_id == g.user.id).all()
+
+                comment_like_ids = [comment_like.comment_id for comment_like in comment_likes]
+
+        except Exception  as e:
+            current_app.logger.error(e)
+
+    # 取出所有的评论id
+
+
     comment_dict_li = []
-    for comment in comments:
-        comment_dict_li.append(comment.to_dict())
+    for comment in comments if comments else []:
+
+        comment_dict=comment.to_dict()
+        comment_dict['is_like'] = False
+        #判断用户是否点赞该评论
+        if g.user and comment.id in comment_like_ids:
+            comment_dict['is_like'] = True
+
+        comment_dict_li.append(comment_dict)
+
 
     data={
         'user':user.to_dict() if user else None,
@@ -195,8 +223,8 @@ def comment_like():
         return jsonify()
 
     #娶到参数
-    comment_id =request.json.get(['comment_id'])
-    news_id = request.json.get(["news_id"])
+    comment_id =request.json.get('comment_id')
+    news_id = request.json.get("news_id")
     action = request.json.get("action")
 
     if not all([comment_id,news_id,action]):
@@ -226,15 +254,19 @@ def comment_like():
         comment_like_model = CommentLike()
         comment_like_model.user_id =user.id
         comment_like_model.comment_id = comment_id
+        comment.like_count += 1
         if not comment_like_model:
             db.session.add(comment_like_model)
+
+
 
 
     else:
         #取消点赞
         comment_like_model=CommentLike.query.filter(CommentLike.user_id==user.id,CommentLike.comment_id==comment_id).first()
+        comment.like_count -= 1
         if comment_like_model:
-            comment_like_model.delete()
+            db.session.delete(comment_like_model)
     try:
         db.session.commit()
     except Exception as e:
