@@ -172,6 +172,9 @@ def user_list():
 def news_review():
     '''返回带审核新闻里列表'''
     page = request.args.get('p',1)
+    keywords = request.args.get('keywords','')
+
+
 
     try:
         page = int(page)
@@ -184,7 +187,12 @@ def news_review():
     total_page =1
 
     try:
-        paginate = News.query.filter(News.status != 0 ).order_by(News.create_time.desc()).paginate(page,constants.ADMIN_NEWS_PAGE_MAX_COUNT,False)
+        filters = [News.status != 0]
+        #如果有关键子
+        if keywords:
+            #添加关键字的检索选项
+            filters.append(News.title.contains(keywords))
+        paginate = News.query.filter(*filters ).order_by(News.create_time.desc()).paginate(page,constants.ADMIN_NEWS_PAGE_MAX_COUNT,False)
 
         news_list =paginate.items
         current_page = paginate.page
@@ -196,7 +204,6 @@ def news_review():
     for news in news_list:
         news_dict_list.append(news.to_review_dict())
 
-
     context = {
         'total_page':total_page,
         'current_page':current_page,
@@ -204,6 +211,7 @@ def news_review():
     }
 
     return render_template('admin/news_review.html',data=context)
+
 
 
 
