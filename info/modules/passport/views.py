@@ -227,6 +227,7 @@ def login():
     session['user_id'] =user.id
     session['mobile'] = user.mobile
     session['nick_name'] =user.nick_name
+    session['is_admin'] = False
 
     user.last_login = datetime.now()
 
