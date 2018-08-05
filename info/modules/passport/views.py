@@ -57,10 +57,10 @@ def send_sms_code():
     current_app.logger.debug("短信验证码是%s" % sms_code_str)
 
     # 6   发送验证码
-    # result = CCP().send_template_sms(mobile,[sms_code_str,constants.SMS_CODE_REDIS_EXPIRES/60 ],1)
-    # if result != 0 :
+    result = CCP().send_template_sms(mobile,[sms_code_str,constants.SMS_CODE_REDIS_EXPIRES/60 ],1)
+    if result != 0 :
         #代表发送不成功
-        # return jsonify(errno=RET.THIRDERR,errmsg="发送短信失败")
+        return jsonify(errno=RET.THIRDERR,errmsg="发送短信失败")
 
     #保存验证码到redis中
     try:
