@@ -10,7 +10,7 @@ from info import db ,models
     这个模块专门提供启动程序的逻辑.
 '''
 #create_app  就类似于工厂方法
-app = create_app('development')
+app = create_app('production')
 #关联app
 manager = Manager(app)
 #将app于db关联
