@@ -54,6 +54,10 @@ class Bezier:
             return result
 
 
+
+
+
+
 class Captcha(object):
     def __init__(self):
         self._bezier = Bezier()
@@ -150,6 +154,8 @@ class Captcha(object):
                         mask)
             offset += int(c_width * squeeze_factor)
         return image
+
+
 
     # draw text
     @staticmethod

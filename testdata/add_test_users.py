@@ -5,7 +5,6 @@ from info import db
 from info.models import User
 from manage import app
 
-
 def add_test_users():
     users = []
     now = datetime.datetime.now()
