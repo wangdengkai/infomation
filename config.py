@@ -43,6 +43,7 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     '''生产环境下的配置'''
     DEBUG = False
+    SQLALCHEMY_DATABASE_URI="mysql+pymysql://root:wangdengkai@127.0.0.1:3306/infomation"
     #生产环境下数据库的配置
 
 class TestingConfig(Config):
@@ -51,7 +52,7 @@ class TestingConfig(Config):
     TESTING = True
 
     #未数据库添加配置
-    SQLALCHEMY_DATABASE_URI="mysql://wangdengkai:wangdengkai@127.0.0.1:3306/test_infomation"
+    SQLALCHEMY_DATABASE_URI="mysql://root:wangdengkai@127.0.0.1:3306/test_infomation"
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
 
