@@ -220,7 +220,7 @@ def login():
     if not user:
         return jsonify(erno=RET.NODATA,errmsg="用户不存在")
 
-    if not user.check_passowrd(password):
+    if not user.check_password(password):
         return jsonify(erno=RET.PWDERR,errmsg="用户密码错误")
 
 

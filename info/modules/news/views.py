@@ -55,8 +55,9 @@ def news_detail(news_id):
     if user:
         if news in user.collection_news:
             is_collected = True
-        if news.user.followers.filter(User.id ==g.user.id).count() > 0:
-            is_followed = True
+        if news.user:
+            if news.user.followers.filter(User.id ==g.user.id).count() > 0:
+                is_followed = True
 
     # 获取当前新闻的评论
     comments = []
