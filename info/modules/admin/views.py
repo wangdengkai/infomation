@@ -46,7 +46,7 @@ def admin_login():
     session['nick_name'] = user.nick_name
     session['mobile'] = user.mobile
     session['is_admin'] = True
-    #TODO 调转到后台管理主页,暂未实现
+    #调转到后台管理主页,暂未实现
     return redirect(url_for('admin.admin_index'))
 
 
@@ -480,6 +480,15 @@ def add_category():
 
     return jsonify(errno=RET.OK,errmsg="保存数据成功")
 
+@admin_blu.route('/logout')
+def admin_logout():
+
+    session.pop('user_id',None)
+    session.pop('mobile',None)
+    session.pop('nick_name',None)
+    session.pop('is_admin',None)
+    # 调转到后台管理主页,暂未实现
+    return redirect(url_for('admin.admin_login'))
 
 
 
